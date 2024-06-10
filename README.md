@@ -15,8 +15,8 @@
 
 首先，需要通过环境变量配置旧数据库和新数据库的连接字符串：
 
-- `ONEAPI_OLD_SQL_DSN`: 旧数据库的连接字符串
-- `ONEAPI_NEW_SQL_DSN`: 新数据库的连接字符串
+- `ONEAPI_OLD_SQL_DSN`: songquanpeng/one-api数据库的连接字符串
+- `ONEAPI_NEW_SQL_DSN`: MartialBE/one-api数据库的连接字符串
 
 例如，对于 MySQL 数据库，可以设置以下环境变量：
 
