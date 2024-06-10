@@ -91,6 +91,10 @@ chmod +x oneapi-dbtransfer
 ./oneapi-dbtransfer
 ```
 
+## 截图
+![运行截图](http://img.qiniu.zerodeng.com/img/202406110247982.png)
+
+
 ## 注意事项
 
 - 请确保旧数据库和新数据库的表结构兼容。

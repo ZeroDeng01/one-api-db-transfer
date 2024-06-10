@@ -24,14 +24,15 @@ func main() {
 	newDB := openDatabase(config.NewDSN)
 
 	tables := []string{"abilities", "channels", "logs", "options", "redemptions", "tokens", "users"}
-	fmt.Printf("🚩数据迁移任务开始🚩")
+	fmt.Println("🚩数据处理开始🚩")
+	fmt.Println("======================")
 	for _, table := range tables {
 		fmt.Printf("🚀 正在处理表: %s\n", table)
 		migrateTable(oldDB, newDB, table)
 		fmt.Printf("✅ 完成处理表: %s\n", table)
 	}
-
-	fmt.Printf("✅数据迁移任务执行结束✅")
+	fmt.Println("======================")
+	fmt.Println("🚩数据处理完成🚩")
 }
 
 func loadConfig() Config {
@@ -163,7 +164,7 @@ func buildInsertSQL(table string, newColumns, oldColumns []string) string {
 	}
 	placeholders := strings.Repeat("?,", len(columns))
 	placeholders = placeholders[:len(placeholders)-1]
-	return fmt.Sprintf("INSERT INTO `%s` (%s) VALUES (%s)", table, strings.Join(columns, ","), placeholders)
+	return fmt.Sprintf("INSERT IGNORE INTO `%s` (%s) VALUES (%s)", table, strings.Join(columns, ","), placeholders)
 }
 
 func buildInsertValues(values []interface{}, oldColumns, newColumns []string) []interface{} {
