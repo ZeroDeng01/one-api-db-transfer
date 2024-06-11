@@ -19,7 +19,19 @@ type Config struct {
 }
 
 func main() {
-	config := loadConfig()
+	var config Config
+
+	if len(os.Args) >= 2 {
+		fmt.Println("🚩命令参数中查询到数据库连接信息🚩")
+		config.OldDSN = os.Args[0]
+		config.NewDSN = os.Args[1]
+	} else {
+		fmt.Println("⚠️命令参数中未查询到数据库连接信息，将从环境变量获取⚠️")
+		fmt.Println("⚠️环境变量ONEAPI_OLD_SQL_DSN:songquanpeng/one-api数据库的连接字符串⚠️")
+		fmt.Println("⚠️环境变量ONEAPI_NEW_SQL_DSN:MartialBE/one-api数据库的连接字符串⚠️")
+		config = loadConfig()
+	}
+
 	oldDB := openDatabase(config.OldDSN)
 	newDB := openDatabase(config.NewDSN)
 
@@ -33,6 +45,7 @@ func main() {
 	}
 	fmt.Println("======================")
 	fmt.Println("🚩数据处理完成🚩")
+	fmt.Scanln()
 }
 
 func loadConfig() Config {
