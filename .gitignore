@@ -1,0 +1,16 @@
+.idea
+.vscode
+upload
+*.exe
+*.db
+build
+*.db-journal
+logs
+data
+tmp/
+/test/
+.env
+common/balancer/
+config.yaml
+dist
+test.yaml
