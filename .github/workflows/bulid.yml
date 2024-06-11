@@ -137,7 +137,7 @@ jobs:
       - name: Build Docker image
         run: |
           repo_name_docker_hub=$(echo "${{ vars.DOCKER_HUB_REPO }}" | tr '[:upper:]' '[:lower:]')
-          repo_name_ghcr=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          repo_name_ghcr=$(echo "${{ github.actor }}/${{ vars.DOCKER_HUB_REPO }}" | tr '[:upper:]' '[:lower:]')
           tag_name=$(echo "${{ env.TAG_NAME }}" | tr '[:upper:]' '[:lower:]')
           docker build -t docker.io/${{ vars.DOCKER_HUB_USERNAME }}/$repo_name_docker_hub:$tag_name .
           docker tag docker.io/${{ vars.DOCKER_HUB_USERNAME }}/$repo_name_docker_hub:$tag_name docker.io/${{ vars.DOCKER_HUB_USERNAME }}/$repo_name_docker_hub:latest
@@ -153,7 +153,7 @@ jobs:
 
       - name: Push to GitHub Container Registry
         run: |
-          repo_name_ghcr=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          repo_name_ghcr=$(echo "${{ github.actor }}/${{ vars.DOCKER_HUB_REPO }}" | tr '[:upper:]' '[:lower:]')
           tag_name=$(echo "${{ env.TAG_NAME }}" | tr '[:upper:]' '[:lower:]')
           docker push ghcr.io/$repo_name_ghcr:$tag_name
           docker push ghcr.io/$repo_name_ghcr:latest
