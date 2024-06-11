@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  dbtransfer:
+    image: zerodeng/oneapi-dbtransfer:latest
+    environment:
+      # songquanpeng/one-api数据库连接
+      ONEAPI_OLD_SQL_DSN: "user:password@tcp(oldhost:3306)/olddb"
+      # MartialBE/one-api数据库连接
+      ONEAPI_NEW_SQL_DSN: "user:password@tcp(newhost:3306)/newdb"
