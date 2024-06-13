@@ -1,5 +1,10 @@
 package main
 
+import (
+	"fmt"
+	"strconv"
+)
+
 // 新版通道类别
 const (
 	ChannelTypeUnknown        = 0
@@ -125,14 +130,41 @@ var channelOldToNew = map[int]int{
 	Groq:           ChannelTypeGroq,
 	Ollama:         ChannelTypeOllama,
 	LingYiWanWu:    ChannelTypeLingyi,
-	StepFun:        ChannelTypeMidjourney,
-	AwsClaude:      ChannelTypeCloudflareAI,
-	Coze:           ChannelTypeCoze,
-	Cohere:         ChannelTypeCohere,
-	DeepSeek:       ChannelTypeDeepseek,
-	Cloudflare:     ChannelTypeCloudflareAI,
-	DeepL:          ChannelTypeStabilityAI,
-	TogetherAI:     ChannelTypeCoze,
-	Doubao:         ChannelTypeOllama,
-	Dummy:          ChannelTypeHunyuan,
+	//StepFun:        ChannelTypeUnknown,
+	//AwsClaude:  ChannelTypeCloudflareAI,
+	Coze:       ChannelTypeCoze,
+	Cohere:     ChannelTypeCohere,
+	DeepSeek:   ChannelTypeDeepseek,
+	Cloudflare: ChannelTypeCloudflareAI,
+	//DeepL:      ChannelTypeUnknown,
+	//TogetherAI: ChannelTypeUnknown,
+	//Doubao:     ChannelTypeUnknown,
+	//Dummy:      ChannelTypeUnknown,
+}
+
+// 旧渠道类别数据映射到新数据枚举类比
+func upgradeChannelType(oldValue interface{}) interface{} {
+	var oldVal int
+	switch v := oldValue.(type) {
+	case int:
+		oldVal = v
+	case []uint8:
+		valStr := string(v)
+		valInt, err := strconv.Atoi(valStr)
+		if err != nil {
+			fmt.Printf("渠道Type旧值: %s (解析错误), 新值: %d (未知类型)\n", valStr, ChannelTypeUnknown)
+			return ChannelTypeUnknown
+		}
+		oldVal = valInt
+	default:
+		fmt.Printf("渠道Type旧值: 非整数或字节数组, 新值: %d (未知类型)\n", ChannelTypeUnknown)
+		return ChannelTypeUnknown
+	}
+
+	if newVal, found := channelOldToNew[oldVal]; found {
+		fmt.Printf("渠道Type旧值: %d, 新值: %d\n", oldVal, newVal)
+		return newVal
+	}
+	fmt.Printf("渠道Type旧值: %d, 新值未找到, 返回默认值: %d (未知类型)\n", oldVal, ChannelTypeUnknown)
+	return ChannelTypeUnknown
 }
