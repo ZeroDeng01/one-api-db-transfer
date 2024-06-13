@@ -2,10 +2,12 @@ package main
 
 import (
 	"database/sql"
+	"encoding/binary"
 	"fmt"
 	"log"
 	"os"
 	"reflect"
+	"strconv"
 	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -20,9 +22,8 @@ type Config struct {
 
 func main() {
 	var config Config
-
 	if len(os.Args) >= 2 {
-		fmt.Println("🚩命令参数中查询到数据库连接信息🚩")
+
 		config.OldDSN = os.Args[0]
 		config.NewDSN = os.Args[1]
 	} else {
@@ -112,8 +113,7 @@ func migrateTable(oldDB, newDB *sql.DB, table string) {
 		if err != nil {
 			log.Fatalf("扫描行数据失败: %v", err)
 		}
-
-		insertValues := buildInsertValues(values, oldColumns, newColumns)
+		insertValues := buildInsertValues(values, oldColumns, newColumns, table)
 		_, err = tx.Exec(insertSQL, insertValues...)
 		if err != nil {
 			log.Fatalf("插入新库表 %s 失败: %v", table, err)
@@ -180,11 +180,43 @@ func buildInsertSQL(table string, newColumns, oldColumns []string) string {
 	return fmt.Sprintf("INSERT IGNORE INTO `%s` (%s) VALUES (%s)", table, strings.Join(columns, ","), placeholders)
 }
 
-func buildInsertValues(values []interface{}, oldColumns, newColumns []string) []interface{} {
+// 旧渠道类别数据映射到新数据枚举类比
+func upgradeChannelType(oldValue interface{}) interface{} {
+	var oldVal int
+	switch v := oldValue.(type) {
+	case int:
+		oldVal = v
+	case []uint8:
+		valStr := string(v)
+		valInt, err := strconv.Atoi(valStr)
+		if err != nil {
+			fmt.Printf("渠道Type旧值: %s (解析错误), 新值: %d (未知类型)\n", valStr, ChannelTypeUnknown)
+			return ChannelTypeUnknown
+		}
+		oldVal = valInt
+	default:
+		fmt.Printf("渠道Type旧值: 非整数或字节数组, 新值: %d (未知类型)\n", ChannelTypeUnknown)
+		return ChannelTypeUnknown
+	}
+
+	if newVal, found := channelOldToNew[oldVal]; found {
+		fmt.Printf("渠道Type旧值: %d, 新值: %d\n", oldVal, newVal)
+		return newVal
+	}
+	fmt.Printf("渠道Type旧值: %d, 新值未找到, 返回默认值: %d (未知类型)\n", oldVal, ChannelTypeUnknown)
+	return ChannelTypeUnknown
+}
+
+func buildInsertValues(values []interface{}, oldColumns, newColumns []string, table string) []interface{} {
 	insertValues := []interface{}{}
 	for _, col := range newColumns {
 		if idx := indexOf(oldColumns, col); idx != -1 {
-			insertValues = append(insertValues, values[idx])
+			value := values[idx]
+			if table == "channels" && col == "type" {
+				fmt.Println("🔗 处理渠道类别数据")
+				value = upgradeChannelType(value)
+			}
+			insertValues = append(insertValues, value)
 		} else {
 			insertValues = append(insertValues, getDefaultForType(reflect.TypeOf(values[0])))
 		}
@@ -218,4 +250,10 @@ func getDefaultForType(t reflect.Type) interface{} {
 	default:
 		return ""
 	}
+}
+func BytesToInt(b []uint8) int {
+	if len(b) < 4 {
+		return 0
+	}
+	return int(binary.BigEndian.Uint32(b))
 }
