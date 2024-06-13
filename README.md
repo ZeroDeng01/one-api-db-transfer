@@ -93,7 +93,7 @@ chmod +x oneapi-dbtransfer-对应系统版本
 ```
 ##### Windows
 ```bash
-./db-transfer-windows-amd64 user:password@tcp(oldhost:3306)/olddb user:password@tcp(oldhost:3306)/newdb
+./db-transfer-windows-amd64.exe user:password@tcp(oldhost:3306)/olddb user:password@tcp(oldhost:3306)/newdb
 ```
 ##### MacOs
 ```bash
