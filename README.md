@@ -21,8 +21,21 @@
 例如，对于 MySQL 数据库，可以设置以下环境变量：
 
 ```bash
-export ONEAPI_OLD_SQL_DSN="user:password@tcp(oldhost:3306)/olddb"
-export ONEAPI_NEW_SQL_DSN="user:password@tcp(newhost:3306)/newdb"
+export ONEAPI_OLD_SQL_DSN="mysql://user:password@tcp(oldhost:3306)/olddb"
+export ONEAPI_NEW_SQL_DSN="mysql://user:password@tcp(newhost:3306)/newdb"
+```
+例如，对于 PostgreSQL 数据库，可以设置以下环境变量：
+
+```bash
+export ONEAPI_OLD_SQL_DSN="postgres://user:password@tcp(oldhost:3306)/olddb"
+export ONEAPI_NEW_SQL_DSN="postgres://user:password@tcp(newhost:3306)/newdb"
+```
+
+例如，对于 Sqlite 数据库，可以设置以下环境变量：
+
+```bash
+export ONEAPI_OLD_SQL_DSN="旧数据库数据文件绝对地址"  // 比如 /olddb.sqlite3 视你项目具体实施情况而定
+export ONEAPI_NEW_SQL_DSN="新数据库数据文件绝对地址"  // 比如 /newdb.sqlite3 视你项目具体实施情况而定
 ```
 
 ### 使用 Docker
@@ -33,8 +46,8 @@ export ONEAPI_NEW_SQL_DSN="user:password@tcp(newhost:3306)/newdb"
 
 ```bash
 docker run --rm \
-  -e ONEAPI_OLD_SQL_DSN="user:password@tcp(oldhost:3306)/olddb" \
-  -e ONEAPI_NEW_SQL_DSN="user:password@tcp(newhost:3306)/newdb" \
+  -e ONEAPI_OLD_SQL_DSN="mysql://user:password@tcp(oldhost:3306)/olddb" \
+  -e ONEAPI_NEW_SQL_DSN="mysql://user:password@tcp(newhost:3306)/newdb" \
   zerodeng/oneapi-dbtransfer:latest
 ```
 
@@ -53,8 +66,8 @@ services:
   dbtransfer:
     image: zerodeng/oneapi-dbtransfer:latest
     environment:
-      ONEAPI_OLD_SQL_DSN: "user:password@tcp(oldhost:3306)/olddb"
-      ONEAPI_NEW_SQL_DSN: "user:password@tcp(newhost:3306)/newdb"
+      ONEAPI_OLD_SQL_DSN: "mysql://user:password@tcp(oldhost:3306)/olddb"
+      ONEAPI_NEW_SQL_DSN: "mysql://user:password@tcp(newhost:3306)/newdb"
 ```
 
 #### 启动服务
@@ -105,7 +118,7 @@ chmod +x oneapi-dbtransfer-对应系统版本
 
 ## 注意事项
 
-- 请确保旧数据库和新数据库的表结构兼容。
+- 由于两个项目数据结构差异比较大，所以迁移后部分数据需要手动调整，比如部分渠道的密钥使用`|`分割，但是两个项目里面密钥填写顺序不一样。
 - 确保在迁移过程中，旧数据库和新数据库的连接稳定。
 - 迁移过程中会输出进度信息，请关注控制台输出以了解迁移进度。
 

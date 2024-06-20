@@ -66,10 +66,10 @@ func openDatabase(dsn string) *sql.DB {
 func detectDriver(dsn string) string {
 	if strings.Contains(dsn, "postgres") {
 		return "postgres"
-	} else if strings.Contains(dsn, "sqlite") {
-		return "sqlite3"
+	} else if strings.Contains(dsn, "mysql") {
+		return "mysql"
 	}
-	return "mysql"
+	return "sqlite3"
 }
 
 func migrateTable(oldDB, newDB *sql.DB, table string) {
