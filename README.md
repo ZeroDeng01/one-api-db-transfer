@@ -102,15 +102,15 @@ chmod +x oneapi-dbtransfer-对应系统版本
 *以下示例仅供，具体以对应平台为准*
 ##### Linux
 ```bash
-./db-transfer-linux-amd64 user:password@tcp(oldhost:3306)/olddb user:password@tcp(oldhost:3306)/newdb
+./db-transfer-linux-amd64 mysql://user:password@tcp(oldhost:3306)/olddb user:password@tcp(oldhost:3306)/newdb
 ```
 ##### Windows
 ```bash
-./db-transfer-windows-amd64.exe user:password@tcp(oldhost:3306)/olddb user:password@tcp(oldhost:3306)/newdb
+./db-transfer-windows-amd64.exe mysql://user:password@tcp(oldhost:3306)/olddb user:password@tcp(oldhost:3306)/newdb
 ```
 ##### MacOs
 ```bash
-./db-transfer-darwin-amd64 user:password@tcp(oldhost:3306)/olddb user:password@tcp(oldhost:3306)/newdb
+./db-transfer-darwin-amd64 mysql://user:password@tcp(oldhost:3306)/olddb user:password@tcp(oldhost:3306)/newdb
 ```
 ## 截图
 ![运行截图](http://img.qiniu.zerodeng.com/img/202406110247982.png)
