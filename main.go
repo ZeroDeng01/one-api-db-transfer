@@ -11,7 +11,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 type Config struct {
@@ -19,8 +19,9 @@ type Config struct {
 	NewDSN string
 }
 
+var config Config
+
 func main() {
-	var config Config
 	if len(os.Args) >= 2 {
 
 		config.OldDSN = os.Args[0]
@@ -56,20 +57,21 @@ func loadConfig() Config {
 }
 
 func openDatabase(dsn string) *sql.DB {
-	db, err := sql.Open(detectDriver(dsn), dsn)
+	driver, dsn := detectDriver(dsn)
+	db, err := sql.Open(driver, dsn)
 	if err != nil {
 		log.Fatalf("无法连接到数据库: %v", err)
 	}
 	return db
 }
 
-func detectDriver(dsn string) string {
-	if strings.Contains(dsn, "postgres") {
-		return "postgres"
-	} else if strings.Contains(dsn, "mysql") {
-		return "mysql"
+func detectDriver(dsn string) (string, string) {
+	if strings.Contains(dsn, "postgres://") {
+		return "postgres", strings.Split(dsn, "postgres://")[1]
+	} else if strings.Contains(dsn, "mysql://") {
+		return "mysql", strings.Split(dsn, "mysql://")[1]
 	}
-	return "sqlite3"
+	return "sqlite", dsn
 }
 
 func migrateTable(oldDB, newDB *sql.DB, table string) {
@@ -98,8 +100,8 @@ func migrateTable(oldDB, newDB *sql.DB, table string) {
 	for i := range values {
 		valuePtrs[i] = &values[i]
 	}
-
-	insertSQL := buildInsertSQL(table, newColumns, oldColumns)
+	driver, _ := detectDriver(config.NewDSN)
+	insertSQL := buildInsertSQL(table, newColumns, oldColumns, driver)
 
 	tx, err := newDB.Begin()
 	if err != nil {
@@ -165,7 +167,7 @@ func contains(slice []string, item string) bool {
 	return false
 }
 
-func buildInsertSQL(table string, newColumns, oldColumns []string) string {
+func buildInsertSQL(table string, newColumns, oldColumns []string, driver string) string {
 	columns := []string{}
 	for _, col := range newColumns {
 		if contains(oldColumns, col) {
@@ -176,7 +178,17 @@ func buildInsertSQL(table string, newColumns, oldColumns []string) string {
 	}
 	placeholders := strings.Repeat("?,", len(columns))
 	placeholders = placeholders[:len(placeholders)-1]
-	return fmt.Sprintf("INSERT IGNORE INTO `%s` (%s) VALUES (%s)", table, strings.Join(columns, ","), placeholders)
+	switch driver {
+	case "mysql":
+		return fmt.Sprintf("INSERT IGNORE INTO `%s` (%s) VALUES (%s)", table, strings.Join(columns, ","), placeholders)
+	case "sqlite":
+		return fmt.Sprintf("INSERT OR IGNORE INTO `%s` (%s) VALUES (%s)", table, strings.Join(columns, ","), placeholders)
+	case "postgres":
+		return fmt.Sprintf("INSERT INTO \"%s\" (%s) VALUES (%s) ON CONFLICT DO NOTHING", table, strings.Join(columns, ","), placeholders)
+	default:
+		log.Fatalf("不支持的数据库驱动: %s", driver)
+		return ""
+	}
 }
 
 func buildInsertValues(values []interface{}, oldColumns, newColumns []string, table string) []interface{} {
