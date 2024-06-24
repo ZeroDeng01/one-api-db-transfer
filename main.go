@@ -22,7 +22,7 @@ type Config struct {
 var config Config
 
 func main() {
-	if len(os.Args) >= 2 {
+	if len(os.Args) > 2 {
 
 		config.OldDSN = os.Args[1]
 		config.NewDSN = os.Args[2]
