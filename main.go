@@ -24,8 +24,8 @@ var config Config
 func main() {
 	if len(os.Args) >= 2 {
 
-		config.OldDSN = os.Args[0]
-		config.NewDSN = os.Args[1]
+		config.OldDSN = os.Args[1]
+		config.NewDSN = os.Args[2]
 	} else {
 		fmt.Println("⚠️命令参数中未查询到数据库连接信息，将从环境变量获取⚠️")
 		fmt.Println("⚠️环境变量ONEAPI_OLD_SQL_DSN:songquanpeng/one-api数据库的连接字符串⚠️")
